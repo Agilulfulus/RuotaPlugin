@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Ruota\Interpreter.cpp" />
+    <ClCompile Include="Ruota\Lambda.cpp" />
+    <ClCompile Include="Ruota\Memory.cpp" />
+    <ClCompile Include="Ruota\Node.cpp" />
+    <ClCompile Include="Ruota\RuotaWrapper.cpp" />
+    <ClCompile Include="Ruota\Scope.cpp" />
+    <ClCompile Include="Ruota\Tokenizer.cpp" />
+    <ClCompile Include="PluginRuota.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Ruota\Ruota.h" />
+    <ClInclude Include="Ruota\Tokenizer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="PluginRuota.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Ruota\compiled\System.ruo" />
+    <None Include="Rainmeter.ruo" />
+  </ItemGroup>
+</Project>

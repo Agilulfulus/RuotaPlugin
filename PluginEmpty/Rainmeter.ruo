@@ -1,0 +1,53 @@
+R"RU0(
+
+static SKIN :: {
+	Log(x) => { _OUTER_CALL_("rm.notice", x); };
+	Bang(x) => { _OUTER_CALL_("rm.bang", x); };
+	GetVariable(x) => { _OUTER_CALL_("rm.getvar", x)[0]; };
+	GetOption(x) => { _OUTER_CALL_("rm.getoption", x)[0]; };
+	SetVariable(var, val) => {
+		Bang("[!SetVariable \"" .. var .. "\" \"" .. val .. "\"]")[0];
+	};
+	GetMeter(x) => { new Meter(x); };
+	GetMeasure(x) => { new Measure(x); };
+
+	dynamic Measure :: {
+		id := null;
+		init(id) => {
+			self.id = id;
+		};
+		Set(option, value) => m from {
+			Bang("[!SetOption \"" .. id .. "\" \"" .. option .. "\" \"".. value .."\"]");
+			m = self;
+		};
+	};
+
+	dynamic Meter :: {
+		id := null;
+		init(id) => {
+			self.id = id;
+		};
+		Set(option, value) => m from {
+			Bang("[!SetOption \"" .. id .. "\" \"" .. option .. "\" \"".. value .."\"]");
+			m = self;
+		};
+		SetX(x) => m from {
+			Bang("[!SetOption \"" .. id .. "\" \"X\" \"".. x .."\"]");
+			m = self;
+		};
+		SetY(y) => m from {
+			Bang("[!SetOption \"" .. id .. "\" \"Y\" \"".. y .."\"]");
+			m = self;
+		};
+		SetW(x) => m from {
+			Bang("[!SetOption \"" .. id .. "\" \"W\" \"".. x .."\"]");
+			m = self;
+		};
+		SetH(y) => m from {
+			Bang("[!SetOption \"" .. id .. "\" \"H\" \"".. y .."\"]");
+			m = self;
+		};
+	};
+};
+
+)RU0"
