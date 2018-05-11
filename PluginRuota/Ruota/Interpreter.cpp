@@ -18,6 +18,7 @@ std::unordered_map<String, int> Interpreter::operators = {
 	{ "end", -10 },
 	{ "type", -10 },
 	{ "len", -10 },
+	{ "&", -10 },
 
 	{ "num", -10 },
 	{ "str", -10 },
@@ -57,9 +58,13 @@ std::unordered_map<String, int> Interpreter::operators = {
 	{ "/=", -3},
 	{ "%=", -3},
 	{ "**=", -3},
-	{ ":=", -3},
-	{ ".=", -3},
 	{ "..=", -3},
+	{ "++=", -3},
+	{ ":=", -3},
+	{ "&=", -3},
+	{ ":&", -3},
+	{ ":&=", -3},
+	{ ".=", -3},
 	{ ">>", 2 },
 	{ "in", 2 },
 	{ "switch", 2 },
@@ -96,25 +101,23 @@ SP_Scope Interpreter::generate(String code, SP_Scope main, String local_file) {
 		if (token == "," || token == ";") continue;
 		if (token == "load") {
 			String filename_raw = stack.back()->execute(current)->toString() + ".ruo";
+			String path = local_file;
 			stack.pop_back();
+			String filename = "";
 
-			String full_path_string = local_file;
-			String filename = filename_raw;
-
-			if(local_file == "") {
-				full_path_string = filename;
-				filename = "";
-				while (full_path_string.back() != '\\' || full_path_string.back() != '/') {
-					filename = String(1, full_path_string.back()) + filename;
-					full_path_string.pop_back();
-					if (full_path_string.empty()) break;
+			//if (local_file == "") {
+				path += filename_raw;
+				while (path.back() != '\\' && path.back() != '/') {
+					filename = String(1, path.back()) + filename;
+					path.pop_back();
+					if (path.empty()) break;
 				}
-			}
+			//}
 
 			if (std::find(LOADED.begin(), LOADED.end(), filename) == LOADED.end()) {
 				String content = "";
 				String line;
-				std::ifstream myfile(full_path_string + filename);
+				std::ifstream myfile(path.substr(1) + filename);
 				if (myfile.is_open()){
 					while (getline(myfile, line))
 						content += line + "\n";
@@ -130,7 +133,7 @@ SP_Scope Interpreter::generate(String code, SP_Scope main, String local_file) {
 					}
 				}
 				LOADED.push_back(filename);
-				auto gen = generate(content, current, full_path_string);
+				auto gen = generate(content, current, path);
 				stack.push_back(gen->main);
 			}
 			else {
@@ -184,6 +187,12 @@ SP_Scope Interpreter::generate(String code, SP_Scope main, String local_file) {
 					stack.push_back(a);
 				params = { new_node(0), b };
 				stack.push_back(new_node(SUB, params));
+			}
+			else if (token == "&") {
+				if (a != nullptr)
+					stack.push_back(a);
+				b->flag = 1;
+				stack.push_back(b);
 			}
 			else if (token == "type") {
 				if (a != nullptr)
@@ -286,8 +295,18 @@ SP_Scope Interpreter::generate(String code, SP_Scope main, String local_file) {
 			}
 			else if (token == "++")
 				stack.push_back(new_node(ADD_ARR, params));
+			else if (token == "++="){
+				auto s = new_node(ADD_ARR, params);
+				params = {a, s};
+				stack.push_back(new_node(SET, params));
+			}
 			else if (token == "..")
 				stack.push_back(new_node(STR_CAT, params));
+			else if (token == "..="){
+				auto s = new_node(STR_CAT, params);
+				params = {a, s};
+				stack.push_back(new_node(SET, params));
+			}
 			else if (token == "-")
 				stack.push_back(new_node(SUB, params));
 			else if (token == "-="){
@@ -343,9 +362,11 @@ SP_Scope Interpreter::generate(String code, SP_Scope main, String local_file) {
 				stack.push_back(new_node(PUSH_ARR, params));
 			else if (token == "post")
 				stack.push_back(new_node(UNSHIFT_ARR, params));
-			else if (token == ".=")
+			else if (token == "&=")
 				stack.push_back(new_node(REF_SET, params));
-			else if (token == "..=")
+			else if (token == ".=")
+				stack.push_back(new_node(ARR_SET, params));
+			else if (token == ":&=")
 				stack.push_back(new_node(REF_SET_DEC, params));
 			else if (token == "->>")
 				stack.push_back(new_node(EXEC_ITER, params));
